@@ -17,6 +17,23 @@ app.get('/', (req, res) => {
     res.send('Servidor rodando');
 });
 
+const session = require('express-session');
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+app.use(session({
+  secret: 'segredo',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 30 * 60 * 1000 // 30 minutos
+  }
+}));
+
+const routes = require('./src/routers/routes');
+app.use(routes);
+
 app.listen(8081, () => {
     console.log('Servidor rodando em http://localhost:8081');
 });
