@@ -14,6 +14,15 @@ const Receita = db.define('Receita', {
         allowNull: false
     },
 
+    ingredientes: {
+        type: Sequelize.TEXT,
+        allowNull: true
+    },
+    modoPreparo: {
+        type: Sequelize.TEXT,
+        allowNull: true
+    },
+
     descricao: {
         type: Sequelize.TEXT,
         allowNull: false
