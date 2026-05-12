@@ -14,7 +14,7 @@ const sequelize = new Sequelize(
 // Teste de conexão
 sequelize.authenticate()
   .then(() => {
-    console.log('Conectado ao banco com sucesso');
+    console.log('Conectado ao banco Postgres com sucesso');
   })
   .catch((err) => {
     console.error('Erro ao conectar ao banco:', err);
