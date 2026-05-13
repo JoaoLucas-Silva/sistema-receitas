@@ -64,6 +64,7 @@ module.exports = {
 
             if (!habilidade) return res.status(404).send('Habilidade não existe no catálogo.');
 
+            // O Sequelize faz a mágica de inserir na tabela intermediária com o nível
             await usuario.addHabilidade(habilidade, { through: { nivel: nivel } });
 
             return res.status(201).send('Habilidade adicionada ao seu perfil!');
@@ -72,10 +73,11 @@ module.exports = {
         }
     },
 
+    // ALUNO: Remove uma habilidade do próprio perfil
     async removeHabilidadeDoPerfil(req, res) {
         try {
             const usuarioId = req.session.user.id;
-            const { id } = req.params;
+            const { id } = req.params; // ID da habilidade
 
             const usuario = await Usuario.findByPk(usuarioId);
             const habilidade = await Habilidade.findByPk(id);

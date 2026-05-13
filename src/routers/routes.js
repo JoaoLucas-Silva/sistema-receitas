@@ -36,4 +36,11 @@ router.delete('/habilidade/:id', auth.isAdmin, controllerHabilidade.deleteHabili
 router.post('/meu-perfil/habilidade', auth.isAuthenticated, controllerHabilidade.addHabilidadeAoPerfil);
 router.delete('/meu-perfil/habilidade/:id', auth.isAuthenticated, controllerHabilidade.removeHabilidadeDoPerfil);
 
+router.post('/habilidade', auth.isAdmin, controllerHabilidade.createHabilidade);
+router.get('/habilidade', auth.isAuthenticated, controllerHabilidade.getHabilidades); 
+router.put('/habilidade/:id', auth.isAdmin, controllerHabilidade.updateHabilidade);
+router.delete('/habilidade/:id', auth.isAdmin, controllerHabilidade.deleteHabilidade);
+router.post('/meu-perfil/habilidade', auth.isAuthenticated, controllerHabilidade.addHabilidadeAoPerfil);
+router.delete('/meu-perfil/habilidade/:id', auth.isAuthenticated, controllerHabilidade.removeHabilidadeDoPerfil);
+
 module.exports = router;

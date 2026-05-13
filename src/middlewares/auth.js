@@ -6,6 +6,7 @@ module.exports = {
     if (req.session.user) {
       return next();
     }
+    
     return res.status(401).send('Não autorizado. Faça login primeiro.');
   },
 
@@ -43,4 +44,5 @@ module.exports = {
       return res.status(500).send('Erro interno ao verificar permissões.');
     }
   }
+
 };
