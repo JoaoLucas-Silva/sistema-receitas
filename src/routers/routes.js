@@ -5,6 +5,7 @@ const auth = require('../middlewares/auth');
 const controllerUsuario = require('../controllers/controllerUsuario');
 const controllerCategoria = require('../controllers/controllerCategoria');
 const controllerReceita = require('../controllers/controllerReceita');
+const controllerHabilidade = require('../controllers/controllerHabilidade');
 
 router.post('/login', controllerUsuario.postLogin);
 router.get('/logout', controllerUsuario.getLogout);
@@ -43,5 +44,12 @@ router.delete(
     auth.isAuthenticated,
     controllerReceita.deleteReceita
 );
+
+router.post('/habilidade', auth.isAdmin, controllerHabilidade.createHabilidade);
+router.get('/habilidade', auth.isAuthenticated, controllerHabilidade.getHabilidades); 
+router.put('/habilidade/:id', auth.isAdmin, controllerHabilidade.updateHabilidade);
+router.delete('/habilidade/:id', auth.isAdmin, controllerHabilidade.deleteHabilidade);
+router.post('/meu-perfil/habilidade', auth.isAuthenticated, controllerHabilidade.addHabilidadeAoPerfil);
+router.delete('/meu-perfil/habilidade/:id', auth.isAuthenticated, controllerHabilidade.removeHabilidadeDoPerfil);
 
 module.exports = router;
