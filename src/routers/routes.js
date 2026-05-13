@@ -8,6 +8,7 @@ const controllerReceita = require('../controllers/controllerReceita');
 
 router.post('/login', controllerUsuario.postLogin);
 router.get('/logout', controllerUsuario.getLogout);
+router.post('/usuario', auth.isAdmin, controllerUsuario.createUsuario);
 
 router.get('/home', auth.isAuthenticated, (req, res) => {
   return res.send('Bem-vindo!');
