@@ -5,9 +5,11 @@ const auth = require('../middlewares/auth');
 const controllerUsuario = require('../controllers/controllerUsuario');
 const controllerCategoria = require('../controllers/controllerCategoria');
 const controllerReceita = require('../controllers/controllerReceita');
+const controllerHabilidade = require('../controllers/controllerHabilidade');
 
 router.post('/login', controllerUsuario.postLogin);
 router.get('/logout', controllerUsuario.getLogout);
+router.post('/usuario', auth.isAdmin, controllerUsuario.createUsuario);
 
 router.get('/home', auth.isAuthenticated, (req, res) => {
   return res.send('Bem-vindo!');
