@@ -21,29 +21,20 @@ router.get('/categoria/:id', controllerCategoria.getCategoriaById);
 router.put('/categoria/:id', controllerCategoria.updateCategoria);
 router.delete('/categoria/:id', controllerCategoria.deleteCategoria);
 
-router.post(
-    '/receita',
-    auth.isAuthenticated,
-    controllerReceita.createReceita
-);
-router.get(
-    '/receita',
-    controllerReceita.getReceitas
-);
-router.get(
-    '/receita/:id',
-    controllerReceita.getReceitaById
-);
-router.put(
-    '/receita/:id',
-    auth.isAuthenticated,
-    controllerReceita.updateReceita
-);
-router.delete(
-    '/receita/:id',
-    auth.isAuthenticated,
-    controllerReceita.deleteReceita
-);
+router.post('/receita', auth.isAuthenticated, controllerReceita.createReceita);
+router.get('/receita', controllerReceita.getReceitas);
+router.get('/receita/:id', controllerReceita.getReceitaById);
+router.post('/receita/coautor', auth.isAuthenticated, auth.canManageRecipe, controllerReceita.addCoautor);
+router.delete('/receita/:receitaId/coautor/:alunoId', auth.isAuthenticated, auth.canManageRecipe, controllerReceita.removeCoautor);
+router.put('/receita/:id', auth.isAuthenticated, auth.canManageRecipe, controllerReceita.updateReceita);
+router.delete('/receita/:id', auth.isAuthenticated, auth.canManageRecipe, controllerReceita.deleteReceita);
+
+router.post('/habilidade', auth.isAdmin, controllerHabilidade.createHabilidade);
+router.get('/habilidade', auth.isAuthenticated, controllerHabilidade.getHabilidades); 
+router.put('/habilidade/:id', auth.isAdmin, controllerHabilidade.updateHabilidade);
+router.delete('/habilidade/:id', auth.isAdmin, controllerHabilidade.deleteHabilidade);
+router.post('/meu-perfil/habilidade', auth.isAuthenticated, controllerHabilidade.addHabilidadeAoPerfil);
+router.delete('/meu-perfil/habilidade/:id', auth.isAuthenticated, controllerHabilidade.removeHabilidadeDoPerfil);
 
 router.post('/habilidade', auth.isAdmin, controllerHabilidade.createHabilidade);
 router.get('/habilidade', auth.isAuthenticated, controllerHabilidade.getHabilidades); 

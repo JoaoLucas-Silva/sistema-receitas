@@ -9,6 +9,9 @@ const ReceitaUsuario = db.define('ReceitaUsuario', {
         defaultValue: false
     }
 
+},
+{
+    tableName: 'ReceitaUsuarios'
 });
 
 module.exports = ReceitaUsuario;

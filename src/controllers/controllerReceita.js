@@ -227,6 +227,44 @@ module.exports = {
 
         }
 
+    },
+
+    async addCoautor(req, res) {
+        try {
+            const { receitaId, alunoId } = req.body;
+
+            const receita = await Receita.findByPk(receitaId);
+            if (!receita) return res.status(404).send('Receita não encontrada.');
+
+            await ReceitaUsuario.create({
+                ReceitaId: receitaId,
+                UsuarioId: alunoId,
+                criador: false
+            });
+
+            return res.status(201).send('Coautor adicionado com sucesso!');
+        } catch (error) {
+            return res.status(500).json({ erro: 'Erro ao adicionar coautor', detalhes: error.message });
+        }
+    },
+
+    async removeCoautor(req, res) {
+        try {
+            const { receitaId, alunoId } = req.params;
+
+            const vinculo = await ReceitaUsuario.findOne({
+                where: { ReceitaId: receitaId, UsuarioId: alunoId }
+            });
+
+            if (!vinculo) return res.status(404).send('Vínculo não encontrado.');
+            
+            if (vinculo.criador) return res.status(403).send('Não é possível remover o criador da receita.');
+
+            await vinculo.destroy();
+            return res.status(200).send('Coautor removido com sucesso.');
+        } catch (error) {
+            return res.status(500).json({ erro: 'Erro ao remover coautor' });
+        }
     }
 
 };
