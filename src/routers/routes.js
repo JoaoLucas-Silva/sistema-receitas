@@ -19,28 +19,12 @@ router.get('/categoria/:id', controllerCategoria.getCategoriaById);
 router.put('/categoria/:id', controllerCategoria.updateCategoria);
 router.delete('/categoria/:id', controllerCategoria.deleteCategoria);
 
-router.post(
-    '/receita',
-    auth.isAuthenticated,
-    controllerReceita.createReceita
-);
-router.get(
-    '/receita',
-    controllerReceita.getReceitas
-);
-router.get(
-    '/receita/:id',
-    controllerReceita.getReceitaById
-);
-router.put(
-    '/receita/:id',
-    auth.isAuthenticated,
-    controllerReceita.updateReceita
-);
-router.delete(
-    '/receita/:id',
-    auth.isAuthenticated,
-    controllerReceita.deleteReceita
-);
+router.post('/receita', auth.isAuthenticated, controllerReceita.createReceita);
+router.get('/receita', controllerReceita.getReceitas);
+router.get('/receita/:id', controllerReceita.getReceitaById);
+router.post('/receita/coautor', auth.isAuthenticated, auth.canManageRecipe, controllerReceita.addCoautor);
+router.delete('/receita/:receitaId/coautor/:alunoId', auth.isAuthenticated, auth.canManageRecipe, controllerReceita.removeCoautor);
+router.put('/receita/:id', auth.isAuthenticated, auth.canManageRecipe, controllerReceita.updateReceita);
+router.delete('/receita/:id', auth.isAuthenticated, auth.canManageRecipe, controllerReceita.deleteReceita);
 
 module.exports = router;
