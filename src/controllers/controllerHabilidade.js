@@ -87,6 +87,45 @@ module.exports = {
         } catch (error) {
             return res.status(500).json({ erro: 'Erro ao remover habilidade' });
         }
+    },
+
+    async getRelatorioHabilidades(req, res) {
+        try {
+
+            const totalAlunos = await Usuario.count({
+                where: { isAdmin: false }
+            });
+
+            if (totalAlunos === 0) {
+                return res.status(200).json({ mensagem: "Nenhum aluno cadastrado no sistema." });
+            }
+
+            const habilidades = await Habilidade.findAll({
+                include: [{
+                    model: Usuario,
+                    attributes: ['id'],
+                    where: { isAdmin: false },
+                    required: false
+                }]
+            });
+
+            const relatorio = habilidades.map(h => {
+                const totalComHabilidade = h.Usuarios.length;
+                const proporcao = ((totalComHabilidade / totalAlunos) * 100).toFixed(2);
+
+                return {
+                    habilidade: h.nome,
+                    quantidadeAlunos: totalComHabilidade,
+                    totalSistema: totalAlunos,
+                    porcentagem: `${proporcao}%`
+                };
+            });
+
+            return res.status(200).json(relatorio);
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ erro: 'Erro ao gerar relatório.' });
+        }
     }
     
 };

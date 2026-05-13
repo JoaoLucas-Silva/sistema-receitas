@@ -65,6 +65,66 @@ module.exports = {
       console.error(err);
       return res.status(500).send('Erro no servidor ao criar usuário');
     }
-  }
+  },
+
+  async getUsuarios(req, res) {
+        try {
+            const usuarios = await Usuario.findAll({
+                attributes: { exclude: ['senha'] }
+            });
+            return res.status(200).json(usuarios);
+        } catch (error) {
+            return res.status(500).json({ erro: 'Erro ao listar usuários.' });
+        }
+    },
+
+    async updateUsuario(req, res) {
+        try {
+            const { id } = req.params;
+            const { login, isAdmin } = req.body;
+
+            const usuario = await Usuario.findByPk(id);
+            if (!usuario) {
+                return res.status(404).send('Usuário não encontrado.');
+            }
+
+            await usuario.update({
+                login: login || usuario.login,
+                isAdmin: isAdmin !== undefined ? isAdmin : usuario.isAdmin
+            });
+
+            return res.status(200).json({ 
+                mensagem: 'Usuário atualizado com sucesso!', 
+                usuario: {
+                    id: usuario.id,
+                    login: usuario.login,
+                    isAdmin: usuario.isAdmin
+                }
+            });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ erro: 'Erro ao atualizar usuário.' });
+        }
+    },
+
+    async deleteUsuario(req, res) {
+        try {
+            const { id } = req.params;
+            const usuario = await Usuario.findByPk(id);
+
+            if (!usuario) {
+                return res.status(404).send('Usuário não encontrado.');
+            }
+
+            if (usuario.id === req.session.user.id) {
+                return res.status(400).send('Você não pode excluir sua própria conta de administrador.');
+            }
+
+            await usuario.destroy();
+            return res.status(200).send('Usuário removido com sucesso.');
+        } catch (error) {
+            return res.status(500).json({ erro: 'Erro ao excluir usuário.' });
+        }
+    }
 
 };

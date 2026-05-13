@@ -10,6 +10,9 @@ const controllerHabilidade = require('../controllers/controllerHabilidade');
 router.post('/login', controllerUsuario.postLogin);
 router.get('/logout', controllerUsuario.getLogout);
 router.post('/usuario', auth.isAdmin, controllerUsuario.createUsuario);
+router.get('/usuario', auth.isAdmin, controllerUsuario.getUsuarios);
+router.put('/usuario/:id', auth.isAdmin, controllerUsuario.updateUsuario);
+router.delete('/usuario/:id', auth.isAdmin, controllerUsuario.deleteUsuario);
 
 router.get('/home', auth.isAuthenticated, (req, res) => {
   return res.send('Bem-vindo!');
@@ -35,6 +38,7 @@ router.put('/habilidade/:id', auth.isAdmin, controllerHabilidade.updateHabilidad
 router.delete('/habilidade/:id', auth.isAdmin, controllerHabilidade.deleteHabilidade);
 router.post('/meu-perfil/habilidade', auth.isAuthenticated, controllerHabilidade.addHabilidadeAoPerfil);
 router.delete('/meu-perfil/habilidade/:id', auth.isAuthenticated, controllerHabilidade.removeHabilidadeDoPerfil);
+router.get('/relatorio/habilidades', auth.isAuthenticated, controllerHabilidade.getRelatorioHabilidades);
 
 router.post('/habilidade', auth.isAdmin, controllerHabilidade.createHabilidade);
 router.get('/habilidade', auth.isAuthenticated, controllerHabilidade.getHabilidades); 
