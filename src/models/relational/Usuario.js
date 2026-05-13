@@ -20,8 +20,9 @@ const Usuario = db.define('Usuario', {
         allowNull: false
     },
 
-    tipo: {
-        type: Sequelize.STRING,
+    isAdmin: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
         allowNull: false
     }
 
