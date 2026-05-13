@@ -30,8 +30,15 @@ Usuario.belongsToMany(Receita, {
 });
 
 // relacionamentos
-Receita.belongsToMany(Categoria, { through: 'ReceitaCategoria' });
-Categoria.belongsToMany(Receita, { through: 'ReceitaCategoria' });
+Receita.belongsToMany(Categoria, { 
+    through: 'ReceitaCategoria',
+    as: 'categorias'
+});
+
+Categoria.belongsToMany(Receita, { 
+    through: 'ReceitaCategoria',
+    as: 'receitas'
+});
 
 module.exports = {
     Usuario,
