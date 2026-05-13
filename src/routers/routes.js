@@ -27,4 +27,11 @@ router.delete('/receita/:receitaId/coautor/:alunoId', auth.isAuthenticated, auth
 router.put('/receita/:id', auth.isAuthenticated, auth.canManageRecipe, controllerReceita.updateReceita);
 router.delete('/receita/:id', auth.isAuthenticated, auth.canManageRecipe, controllerReceita.deleteReceita);
 
+router.post('/habilidade', auth.isAdmin, controllerHabilidade.createHabilidade);
+router.get('/habilidade', auth.isAuthenticated, controllerHabilidade.getHabilidades); 
+router.put('/habilidade/:id', auth.isAdmin, controllerHabilidade.updateHabilidade);
+router.delete('/habilidade/:id', auth.isAdmin, controllerHabilidade.deleteHabilidade);
+router.post('/meu-perfil/habilidade', auth.isAuthenticated, controllerHabilidade.addHabilidadeAoPerfil);
+router.delete('/meu-perfil/habilidade/:id', auth.isAuthenticated, controllerHabilidade.removeHabilidadeDoPerfil);
+
 module.exports = router;
