@@ -8,9 +8,7 @@ const {
 module.exports = {
 
     async createReceita(req, res) {
-
         try {
-
             const {
                 nome,
                 descricao,
@@ -31,13 +29,9 @@ module.exports = {
             });
 
             if (categorias && categorias.length > 0) {
-
                 const categoriasEncontradas = await Categoria.findAll({
-                    where: {
-                        id: categorias
-                    }
+                    where: { id: categorias }
                 });
-
                 await receita.setCategorias(categoriasEncontradas);
             }
 
@@ -48,102 +42,73 @@ module.exports = {
             });
 
             return res.status(201).json(receita);
-
         } catch (error) {
-
             return res.status(500).json({
                 erro: 'Erro ao criar receita',
                 detalhes: error.message
             });
-
         }
-
     },
 
     async getReceitas(req, res) {
-
         try {
-
             const receitas = await Receita.findAll({
-
                 include: [
                     {
                         model: Categoria,
+                        as: 'categorias',
                         through: { attributes: [] }
                     },
                     {
                         model: Usuario,
-                        through: {
-                            attributes: ['criador']
-                        }
+                        attributes: ['id', 'login'],
+                        through: { attributes: ['criador'] }
                     }
                 ]
-
             });
-
             return res.status(200).json(receitas);
-
         } catch (error) {
-
             return res.status(500).json({
                 erro: 'Erro ao buscar receitas',
                 detalhes: error.message
             });
-
         }
-
     },
 
     async getReceitaById(req, res) {
-
         try {
-
             const { id } = req.params;
-
             const receita = await Receita.findByPk(id, {
-
                 include: [
                     {
                         model: Categoria,
+                        as: 'categorias',
                         through: { attributes: [] }
                     },
                     {
                         model: Usuario,
-                        through: {
-                            attributes: ['criador']
-                        }
+                        attributes: ['id', 'login'],
+                        through: { attributes: ['criador'] }
                     }
                 ]
-
             });
 
             if (!receita) {
-
-                return res.status(404).json({
-                    erro: 'Receita não encontrada'
-                });
-
+                return res.status(404).json({ erro: 'Receita não encontrada' });
             }
 
             return res.status(200).json(receita);
-
         } catch (error) {
-
             return res.status(500).json({
                 erro: 'Erro ao buscar receita',
                 detalhes: error.message
             });
-
         }
-
     },
 
     async updateReceita(req, res) {
-
         try {
-
             const { id } = req.params;
-
             const {
                 nome,
                 descricao,
@@ -156,11 +121,7 @@ module.exports = {
             const receita = await Receita.findByPk(id);
 
             if (!receita) {
-
-                return res.status(404).json({
-                    erro: 'Receita não encontrada'
-                });
-
+                return res.status(404).json({ erro: 'Receita não encontrada' });
             }
 
             await receita.update({
@@ -172,67 +133,43 @@ module.exports = {
             });
 
             if (categorias) {
-
                 const categoriasEncontradas = await Categoria.findAll({
-                    where: {
-                        id: categorias
-                    }
+                    where: { id: categorias }
                 });
-
                 await receita.setCategorias(categoriasEncontradas);
-
             }
 
             return res.status(200).json(receita);
-
         } catch (error) {
-
             return res.status(500).json({
                 erro: 'Erro ao atualizar receita',
                 detalhes: error.message
             });
-
         }
-
     },
 
     async deleteReceita(req, res) {
-
         try {
-
             const { id } = req.params;
-
             const receita = await Receita.findByPk(id);
 
             if (!receita) {
-
-                return res.status(404).json({
-                    erro: 'Receita não encontrada'
-                });
-
+                return res.status(404).json({ erro: 'Receita não encontrada' });
             }
 
             await receita.destroy();
-
-            return res.status(200).json({
-                mensagem: 'Receita removida com sucesso'
-            });
-
+            return res.status(200).json({ mensagem: 'Receita removida com sucesso' });
         } catch (error) {
-
             return res.status(500).json({
                 erro: 'Erro ao remover receita',
                 detalhes: error.message
             });
-
         }
-
     },
 
     async addCoautor(req, res) {
         try {
             const { receitaId, alunoId } = req.body;
-
             const receita = await Receita.findByPk(receitaId);
             if (!receita) return res.status(404).send('Receita não encontrada.');
 
@@ -251,13 +188,11 @@ module.exports = {
     async removeCoautor(req, res) {
         try {
             const { receitaId, alunoId } = req.params;
-
             const vinculo = await ReceitaUsuario.findOne({
                 where: { ReceitaId: receitaId, UsuarioId: alunoId }
             });
 
             if (!vinculo) return res.status(404).send('Vínculo não encontrado.');
-            
             if (vinculo.criador) return res.status(403).send('Não é possível remover o criador da receita.');
 
             await vinculo.destroy();
@@ -265,6 +200,37 @@ module.exports = {
         } catch (error) {
             return res.status(500).json({ erro: 'Erro ao remover coautor' });
         }
-    }
+    },
 
+    async getReceitasByCategoria(req, res) {
+        try {
+            const { categoriaId } = req.params;
+
+            const receitas = await Receita.findAll({
+                include: [
+                    {
+                        model: Categoria,
+                        as: 'categorias',
+                        where: { id: categoriaId },
+                        attributes: ['nome'],
+                        through: { attributes: [] }
+                    },
+                    {
+                        model: Usuario,
+                        attributes: ['login'],
+                        through: { attributes: [] }
+                    }
+                ]
+            });
+
+            if (receitas.length === 0) {
+                return res.status(404).send('Nenhuma receita encontrada para esta categoria.');
+            }
+
+            return res.status(200).json(receitas);
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ erro: 'Erro ao filtrar receitas por categoria.', detalhes: error.message });
+        }
+    }
 };
