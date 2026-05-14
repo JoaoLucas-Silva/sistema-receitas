@@ -1,62 +1,103 @@
-<nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb bg-transparent p-0">
-        <li class="breadcrumb-item"><a href="/home" class="text-success">Início</a></li>
-        <li class="breadcrumb-item active">{{receita.nome}}</li>
-    </ol>
-</nav>
+<nav aria-label="breadcrumb" class="mb-4"> 
+     <ol class="breadcrumb bg-transparent p-0"> 
+         <li class="breadcrumb-item"><a href="/home" class="text-success">Início</a></li> 
+         <li class="breadcrumb-item active">{{receita.nome}}</li> 
+     </ol> 
+ </nav> 
 
-<div class="bg-white border rounded-lg p-5">
-    <div class="row mb-4">
-        <div class="col">
-            <div class="mb-3">
-                {{#each receita.categorias}}
-                <span class="badge-custom mr-2">{{this.nome}}</span>
-                {{/each}}
-            </div>
-            <h1 class="font-weight-bold text-dark mb-2">{{receita.nome}}</h1>
-            <p class="lead text-muted">{{receita.descricao}}</p>
-        </div>
-        {{#if receita.link}}
-        <div class="col-auto">
-            <a href="{{receita.link}}" target="_blank" class="btn btn-outline-dark">
-                Ver Vídeo/Referência ↗
-            </a>
-        </div>
-        {{/if}}
-    </div>
+ <div class="bg-white border rounded-lg p-5 shadow-sm"> 
+     <div class="row mb-4"> 
+         <div class="col"> 
+             <div class="mb-3"> 
+                 {{#each receita.categorias}} 
+                 <span class="badge-custom mr-2">{{this.nome}}</span> 
+                 {{/each}} 
+             </div> 
+             <h1 class="font-weight-bold text-dark mb-2">{{receita.nome}}</h1> 
+             <p class="lead text-muted">{{receita.descricao}}</p> 
+         </div> 
+         {{#if receita.link}} 
+         <div class="col-auto"> 
+             <a href="{{receita.link}}" target="_blank" class="btn btn-outline-dark font-weight-bold"> 
+                 Ver Referência Externa ↗ 
+             </a> 
+         </div> 
+         {{/if}} 
+     </div> 
 
-    <hr class="my-5">
+     <hr class="my-5"> 
 
-    <div class="row">
-        <div class="col-md-5 border-right">
-            <h5 class="text-uppercase text-muted small font-weight-bold mb-4 tracking-wider">Ingredientes</h5>
-            <div class="text-dark" style="white-space: pre-line;">
-                {{receita.ingredientes}}
-            </div>
-        </div>
-        <div class="col-md-7 pl-md-5">
-            <h5 class="text-uppercase text-muted small font-weight-bold mb-4 tracking-wider">Modo de Preparo</h5>
-            <div class="text-dark leading-relaxed" style="white-space: pre-line;">
-                {{receita.modoPreparo}}
-            </div>
-        </div>
-    </div>
+     <div class="row"> 
+         <div class="col-md-5 border-right"> 
+             <h5 class="text-uppercase text-muted small font-weight-bold mb-4 tracking-wider">Ingredientes</h5> 
+             <div class="text-dark" style="white-space: pre-line;"> 
+                 {{receita.ingredientes}} 
+             </div> 
+         </div> 
+         <div class="col-md-7 pl-md-5"> 
+             <h5 class="text-uppercase text-muted small font-weight-bold mb-4 tracking-wider">Modo de Preparo</h5> 
+             <div class="text-dark leading-relaxed" style="white-space: pre-line;"> 
+                 {{receita.modoPreparo}} 
+             </div> 
+         </div> 
+     </div> 
 
-    <div class="mt-5 pt-4 border-top">
-        <h6 class="font-weight-bold text-muted small text-uppercase mb-3">Responsáveis por esta receita:</h6>
-        <div class="d-flex flex-wrap">
-            {{#each receita.Usuarios}}
-            <div class="bg-light px-3 py-2 rounded-pill mr-2 mb-2 small font-weight-bold">
-                👤 {{this.login}} {{#if this.ReceitaUsuario.criador}}(Criador){{/if}}
-            </div>
-            {{/each}}
-        </div>
-    </div>
-</div>
+     <div class="mt-5 pt-4 border-top"> 
+         <h6 class="font-weight-bold text-muted small text-uppercase mb-3">Responsáveis por esta receita:</h6> 
+         <div class="d-flex flex-wrap"> 
+             {{#each receita.Usuarios}} 
+             <div class="bg-light px-3 py-2 rounded-pill mr-2 mb-2 small font-weight-bold border"> 
 
-<div class="mt-4 text-right">
-    <a href="/receita/editar/{{receita.id}}" class="btn btn-link text-primary font-weight-bold">Editar Receita</a>
-    <form action="/receita/{{receita.id}}?_method=DELETE" method="POST" class="d-inline ml-3">
-        <button type="submit" class="btn btn-link text-danger font-weight-bold" onclick="return confirm('Excluir esta receita?')">Remover</button>
-    </form>
-</div>
+                 👤 {{this.login}} {{#if 
+this.ReceitaUsuario.criador}}<span class="text-success 
+ml-1">(Criador)</span>{{/if}} 
+             </div> 
+             {{/each}} 
+         </div> 
+     </div> 
+ </div> 
+
+ <div class="mt-4 text-right"> 
+     <a href="/receita/editar/{{receita.id}}" class="btn btn-link text-primary font-weight-bold">Editar Receita</a> 
+     <form action="/receita/{{receita.id}}?_method=DELETE" method="POST" class="d-inline ml-3"> 
+
+         <button type="submit" class="btn btn-link text-danger 
+font-weight-bold" onclick="return confirm('Excluir esta receita 
+definitivamente?')">Remover</button> 
+     </form> 
+ </div> 
+
+ <div class="mt-5 pt-5 border-top"> 
+     <h4 class="font-weight-bold mb-4">Comentários</h4> 
+
+     <div class="bg-light p-4 rounded-lg mb-5 border"> 
+         <form action="/receita/{{receita.id}}/comentario" method="POST"> 
+             <div class="form-group"> 
+                 <label class="small font-weight-bold text-muted text-uppercase">Sua opinião</label> 
+
+                 <textarea name="texto" class="form-control border-0"
+ rows="3" placeholder="Compartilhe o que achou desta receita..." 
+required></textarea> 
+             </div> 
+             <div class="text-right"> 
+                 <button type="submit" class="btn btn-orange btn-sm px-4 shadow-sm">Publicar Comentário</button> 
+             </div> 
+         </form> 
+     </div> 
+
+     <div class="space-y-4"> 
+         {{#each receita.comentarios}} 
+         <div class="bg-white border rounded-lg p-4 mb-3"> 
+             <div class="d-flex justify-content-between mb-2"> 
+                 <span class="font-weight-bold text-dark text-sm">👤 {{this.usuarioLogin}}</span> 
+                 <span class="text-muted small">{{this.createdAt}}</span> 
+             </div> 
+             <p class="text-muted mb-0 small">{{this.texto}}</p> 
+         </div> 
+         {{else}} 
+         <div class="text-center py-4"> 
+             <p class="text-muted italic small">Nenhum comentário registrado nesta receita.</p> 
+         </div> 
+         {{/each}} 
+     </div> 
+ </div>
