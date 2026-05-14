@@ -1,0 +1,57 @@
+<div class="mb-5">
+    <h2 class="font-weight-bold">🥗 {{#if receita}}Editar{{else}}Nova{{/if}} Receita</h2>
+    <p class="text-muted">Preencha os detalhes da sua criação culinária.</p>
+</div>
+
+<div class="bg-white border rounded-lg p-5">
+    <form action="{{#if receita}}/receita/{{receita.id}}?_method=PUT{{else}}/receita{{/if}}" method="POST">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="form-group">
+                    <label class="small font-weight-bold text-muted text-uppercase">Nome da Receita</label>
+                    <input type="text" name="nome" class="form-control" value="{{receita.nome}}" required>
+                </div>
+                <div class="form-group">
+                    <label class="small font-weight-bold text-muted text-uppercase">Descrição Curta</label>
+                    <input type="text" name="descricao" class="form-control" value="{{receita.descricao}}" required>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label class="small font-weight-bold text-muted text-uppercase">Categorias</label>
+                    <select name="categorias" class="form-control" multiple required style="height: 110px;">
+                        {{#each listaCategorias}}
+                        <option value="{{this.id}}">{{this.nome}}</option>
+                        {{/each}}
+                    </select>
+                    <small class="text-muted">Segure Ctrl para selecionar várias.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mt-3">
+            <label class="small font-weight-bold text-muted text-uppercase">Link Externo (Vídeo ou Referência)</label>
+            <input type="url" name="link" class="form-control" value="{{receita.link}}" placeholder="https://...">
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="small font-weight-bold text-muted text-uppercase">Ingredientes</label>
+                    <textarea name="ingredientes" class="form-control" rows="8" placeholder="Um ingrediente por linha">{{receita.ingredientes}}</textarea>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="small font-weight-bold text-muted text-uppercase">Modo de Preparo</label>
+                    <textarea name="modoPreparo" class="form-control" rows="8" placeholder="Passo a passo detalhado">{{receita.modoPreparo}}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5 border-top pt-4 text-right">
+            <a href="/home" class="btn btn-link text-muted mr-3">Cancelar</a>
+            <button type="submit" class="btn btn-primary px-5">Salvar Receita</button>
+        </div>
+    </form>
+</div>

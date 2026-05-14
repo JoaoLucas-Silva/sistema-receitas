@@ -1,0 +1,78 @@
+<div class="row mb-5">
+    <div class="col">
+        <h2 class="font-weight-bold">Painel de Administração</h2>
+        <p class="text-muted">Gestão de Alunos, Habilidades e Categorias.</p>
+    </div>
+</div>
+
+<ul class="nav nav-pills mb-4" id="adminTabs" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active" id="usuarios-tab" data-toggle="pill" href="#usuarios" role="tab">Alunos</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="habilidades-tab" data-toggle="pill" href="#habilidades" role="tab">Catálogo de Habilidades</a>
+    </li>
+</ul>
+
+<div class="tab-content bg-white border rounded-lg p-4" id="adminTabsContent">
+    
+    <div class="tab-pane fade show active" id="usuarios" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="font-weight-bold mb-0">Lista de Usuários</h5>
+            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalUsuario">+ Novo Aluno</button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-borderless table-hover">
+                <thead class="bg-light">
+                    <tr class="small text-muted text-uppercase">
+                        <th>Login</th>
+                        <th>Tipo</th>
+                        <th class="text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each usuarios}}
+                    <tr class="border-bottom">
+                        <td class="font-weight-bold">{{this.login}}</td>
+                        <td>
+                            {{#if this.isAdmin}}
+                            <span class="badge badge-dark">Admin</span>
+                            {{else}}
+                            <span class="badge badge-light border">Aluno</span>
+                            {{/if}}
+                        </td>
+                        <td class="text-right">
+                            <button class="btn btn-link text-primary btn-sm p-0 mr-3">Editar</button>
+                            <form action="/usuario/{{this.id}}?_method=DELETE" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-link text-danger btn-sm p-0">Remover</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="habilidades" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="font-weight-bold mb-0">Habilidades Globais</h5>
+            <form action="/habilidade" method="POST" class="form-inline">
+                <input type="text" name="nome" class="form-control form-control-sm mr-2" placeholder="Nova Habilidade">
+                <button type="submit" class="btn btn-primary btn-sm">Adicionar</button>
+            </form>
+        </div>
+        <div class="row">
+            {{#each habilidades}}
+            <div class="col-md-4 mb-2">
+                <div class="border rounded p-2 d-flex justify-content-between align-items-center bg-light">
+                    <span class="small font-weight-bold">{{this.nome}}</span>
+                    <form action="/habilidade/{{this.id}}?_method=DELETE" method="POST">
+                        <button type="submit" class="btn btn-link text-danger btn-sm p-0">×</button>
+                    </form>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,52 @@
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="mb-4 text-center">
+            <h2 class="font-weight-bold">Minhas Habilidades</h2>
+            <p class="text-muted">Defina seu nível de domínio nas técnicas culinárias.</p>
+        </div>
+        
+        <div class="bg-white border rounded-lg p-4 shadow-sm">
+            <form action="/meu-perfil/habilidade" method="POST">
+                <div class="form-group">
+                    <label class="small font-weight-bold text-muted text-uppercase">Escolher Habilidade</label>
+                    <select name="habilidadeId" class="form-control" required>
+                        <option value="">Selecione uma técnica...</option>
+                        {{#each habilidadesDisponiveis}}
+                        <option value="{{this.id}}">{{this.nome}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="small font-weight-bold text-muted text-uppercase d-flex justify-content-between">
+                        Nível de Domínio (0 a 10)
+                        <span id="nivelValue" class="text-success">5</span>
+                    </label>
+                    <input type="range" name="nivel" class="custom-range" min="0" max="10" step="1" value="5" 
+                           oninput="document.getElementById('nivelValue').innerText = this.value">
+                    <div class="d-flex justify-content-between small text-muted">
+                        <span>Iniciante</span>
+                        <span>Expert</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block py-2 mt-4">Vincular ao meu Perfil</button>
+            </form>
+        </div>
+
+        <div class="mt-5">
+            <h6 class="font-weight-bold text-muted text-uppercase mb-3">Minhas Competências Atuais:</h6>
+            {{#each minhasHabilidades}}
+            <div class="list-item d-flex justify-content-between align-items-center py-2 px-3">
+                <span class="font-weight-bold">{{this.nome}}</span>
+                <div class="d-flex align-items-center">
+                    <span class="badge badge-success mr-3">Nível {{this.UsuarioHabilidade.nivel}}</span>
+                    <form action="/meu-perfil/habilidade/{{this.id}}?_method=DELETE" method="POST">
+                        <button type="submit" class="btn btn-link text-danger p-0 small">Remover</button>
+                    </form>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>

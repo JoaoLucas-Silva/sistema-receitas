@@ -1,0 +1,30 @@
+<div class="mb-5">
+    <h2 class="font-weight-bold">Relatório de Competências</h2>
+    <p class="text-muted">Proporção de alunos que dominam cada habilidade culinária.</p>
+</div>
+
+<div class="row">
+    {{#each relatorio}}
+    <div class="col-md-6 mb-4">
+        <div class="bg-white border rounded-lg p-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="font-weight-bold text-dark">{{this.habilidade}}</span>
+                <span class="badge-custom">{{this.porcentagem}}</span>
+            </div>
+            <div class="progress" style="height: 8px; border-radius: 10px;">
+                <div class="progress-bar bg-success" role="progressbar" 
+                     style="width: {{this.porcentagem}}" 
+                     aria-valuenow="{{this.quantidadeAlunos}}" aria-valuemin="0" aria-valuemax="{{this.totalSistema}}">
+                </div>
+            </div>
+            <small class="text-muted d-block mt-2">
+                {{this.quantidadeAlunos}} de {{this.totalSistema}} alunos dominam esta técnica.
+            </small>
+        </div>
+    </div>
+    {{else}}
+    <div class="col-12 text-center py-5">
+        <p class="text-muted italic">Ainda não há dados suficientes para gerar o relatório.</p>
+    </div>
+    {{/each}}
+</div>

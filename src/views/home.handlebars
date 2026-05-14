@@ -1,0 +1,39 @@
+<div class="row align-items-center mb-5">
+    <div class="col">
+        <h1 class="font-weight-bold tracking-tighter">Explorar Receitas</h1>
+        <p class="text-muted mb-0">Descubra os melhores pratos da nossa comunidade acadêmica.</p>
+    </div>
+    <div class="col-auto">
+        <a href="/receita/cadastrar" class="btn btn-orange px-4">+ Nova Receita</a>
+    </div>
+</div>
+
+<div class="recipe-list">
+    {{#each receitas}}
+    <div class="list-item d-flex justify-content-between align-items-center">
+        <div>
+            <div class="d-flex align-items-center mb-2">
+                {{#each this.categorias}}
+                <span class="badge-custom mr-2">{{this.nome}}</span>
+                {{/each}}
+            </div>
+            <h4 class="font-weight-bold text-dark mb-1">{{this.nome}}</h4>
+            <p class="text-muted mb-0 small">{{this.descricao}}</p>
+            <div class="mt-2">
+                <small class="text-muted">Por: 
+                    {{#each this.Usuarios}}
+                        {{this.login}}{{#unless @last}}, {{/unless}}
+                    {{/each}}
+                </small>
+            </div>
+        </div>
+        <div class="ml-4">
+            <a href="/receita/{{this.id}}" class="btn btn-outline-success px-4">Ver Detalhes</a>
+        </div>
+    </div>
+    {{else}}
+    <div class="text-center py-5 border rounded-lg bg-white">
+        <p class="text-muted mb-0 italic">Nenhuma receita encontrada no sistema.</p>
+    </div>
+    {{/each}}
+</div>
