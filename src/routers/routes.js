@@ -2,10 +2,15 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middlewares/auth');
 
+router.get('/home', auth.isAuthenticated, (req, res) => {
+  return res.send('Bem-vindo!');
+});
+
 const controllerUsuario = require('../controllers/controllerUsuario');
 const controllerCategoria = require('../controllers/controllerCategoria');
 const controllerReceita = require('../controllers/controllerReceita');
 const controllerHabilidade = require('../controllers/controllerHabilidade');
+const controllerComentario = require('../controllers/controllerComentario');
 
 router.post('/login', controllerUsuario.postLogin);
 router.get('/logout', controllerUsuario.getLogout);
@@ -13,10 +18,6 @@ router.post('/usuario', auth.isAdmin, controllerUsuario.createUsuario);
 router.get('/usuario', auth.isAdmin, controllerUsuario.getUsuarios);
 router.put('/usuario/:id', auth.isAdmin, controllerUsuario.updateUsuario);
 router.delete('/usuario/:id', auth.isAdmin, controllerUsuario.deleteUsuario);
-
-router.get('/home', auth.isAuthenticated, (req, res) => {
-  return res.send('Bem-vindo!');
-});
 
 router.post('/categoria', controllerCategoria.createCategoria);
 router.get('/categoria', controllerCategoria.getCategorias);
@@ -47,5 +48,8 @@ router.put('/habilidade/:id', auth.isAdmin, controllerHabilidade.updateHabilidad
 router.delete('/habilidade/:id', auth.isAdmin, controllerHabilidade.deleteHabilidade);
 router.post('/meu-perfil/habilidade', auth.isAuthenticated, controllerHabilidade.addHabilidadeAoPerfil);
 router.delete('/meu-perfil/habilidade/:id', auth.isAuthenticated, controllerHabilidade.removeHabilidadeDoPerfil);
+
+router.get('/receita/:receitaId/comentario', controllerComentario.getComentarios);
+router.post('/receita/:receitaId/comentario', auth.isAuthenticated, controllerComentario.addComentario);
 
 module.exports = router;
