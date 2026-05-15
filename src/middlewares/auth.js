@@ -27,10 +27,6 @@ module.exports = {
         return res.status(400).send('ID da receita não identificado na requisição.');
       }
 
-      if (req.session.user.isAdmin) {
-        return next();
-      }
-
       const permissao = await ReceitaUsuario.findOne({
         where: { 
             ReceitaId: receitaId, 

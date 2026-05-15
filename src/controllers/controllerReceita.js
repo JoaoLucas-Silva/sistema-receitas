@@ -113,6 +113,7 @@ module.exports = {
                         },
                         {
                             model: Usuario,
+                            as: 'Usuarios',
                             attributes: ['id', 'login']
                         }
                     ]
@@ -252,13 +253,28 @@ module.exports = {
     async deleteReceita(req, res) {
         try {
             const { id } = req.params;
+            const usuarioLogadoId = req.session.user.id;
+
+            const vinculo = await ReceitaUsuario.findOne({
+                where: { 
+                    ReceitaId: id, 
+                    UsuarioId: usuarioLogadoId 
+                }
+            });
+
+            if (!vinculo || vinculo.criador === false) {
+                return res.status(403).send("Acesso Negado: Apenas o criador original pode excluir esta receita.");
+            }
+
             const receita = await Receita.findByPk(id);
 
             if (!receita) return res.status(404).send('Receita não encontrada');
 
             await receita.destroy();
             return res.redirect('/home');
+            
         } catch (error) {
+            console.error("Erro no deleteReceita:", error);
             return res.status(500).send("Erro ao remover receita");
         }
     },
@@ -297,42 +313,6 @@ module.exports = {
             return res.redirect(`/receita/${receitaId}`);
         } catch (error) {
             return res.status(500).send("Erro ao remover coautor");
-        }
-    },
-
-    async getReceitasByCategoria(req, res) {
-        try {
-            const { categoriaId } = req.params;
-
-            const receitasRaw = await Receita.findAll({
-                include: [
-                    {
-                        model: Categoria,
-                        as: 'categorias',
-                        where: { id: categoriaId },
-                        through: { attributes: [] }
-                    },
-                    {
-                        model: Usuario,
-                        attributes: ['id', 'login']
-                    }
-                ]
-            });
-
-            const receitas = receitasRaw.map(r => r.get({ plain: true }));
-
-            const categoriasRaw = await Categoria.findAll();
-            const categorias = categoriasRaw.map(c => c.get({ plain: true }));
-
-            return res.render('home', { 
-                receitas, 
-                categorias, 
-                usuario: req.session.user 
-            });
-            
-        } catch (error) {
-            console.error("Erro ao filtrar por categoria:", error);
-            return res.status(500).send("Erro ao carregar receitas desta categoria.");
         }
     },
 
