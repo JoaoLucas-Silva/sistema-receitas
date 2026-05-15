@@ -113,6 +113,7 @@ module.exports = {
                         },
                         {
                             model: Usuario,
+                            as: 'Usuarios',
                             attributes: ['id', 'login']
                         }
                     ]
@@ -297,42 +298,6 @@ module.exports = {
             return res.redirect(`/receita/${receitaId}`);
         } catch (error) {
             return res.status(500).send("Erro ao remover coautor");
-        }
-    },
-
-    async getReceitasByCategoria(req, res) {
-        try {
-            const { categoriaId } = req.params;
-
-            const receitasRaw = await Receita.findAll({
-                include: [
-                    {
-                        model: Categoria,
-                        as: 'categorias',
-                        where: { id: categoriaId },
-                        through: { attributes: [] }
-                    },
-                    {
-                        model: Usuario,
-                        attributes: ['id', 'login']
-                    }
-                ]
-            });
-
-            const receitas = receitasRaw.map(r => r.get({ plain: true }));
-
-            const categoriasRaw = await Categoria.findAll();
-            const categorias = categoriasRaw.map(c => c.get({ plain: true }));
-
-            return res.render('home', { 
-                receitas, 
-                categorias, 
-                usuario: req.session.user 
-            });
-            
-        } catch (error) {
-            console.error("Erro ao filtrar por categoria:", error);
-            return res.status(500).send("Erro ao carregar receitas desta categoria.");
         }
     },
 
