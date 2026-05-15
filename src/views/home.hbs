@@ -1,0 +1,56 @@
+<div class="mb-5 bg-white border rounded-lg p-4 shadow-sm">
+    <h6 class="font-weight-bold text-muted small text-uppercase mb-3">Filtrar por Categoria:</h6>
+    <div class="d-flex flex-wrap">
+        <a href="/home" class="btn btn-sm btn-outline-dark mr-2 mb-2 px-3 font-weight-bold">Mostrar Todas</a>
+        {{#each categorias}}
+        <a href="/receita/categoria/{{this.id}}" class="btn btn-sm btn-outline-success mr-2 mb-2 px-3">{{this.nome}}</a>
+        {{/each}}
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-end mb-3">
+    <h3 class="font-weight-bold text-dark mb-0">🍽️ Receitas</h3>
+    <small class="text-muted font-italic">{{receitas.length}} resultados encontrados</small>
+</div>
+
+<div class="recipe-list">
+    {{#each receitas}}
+    <div class="list-item bg-white border rounded-lg p-4 mb-3 d-flex justify-content-between align-items-center shadow-sm">
+        <div>
+            <div class="mb-2">
+                {{#each this.categorias}}
+                <a href="/receita/categoria/{{this.id}}" 
+                class="badge badge-pill badge-light text-success border border-success mr-1" 
+                style="font-size: 0.75rem; text-decoration: none;">
+                    {{this.nome}}
+                </a>
+                {{/each}}
+            </div>
+
+            <h4 class="font-weight-bold text-dark mb-1">{{this.nome}}</h4>
+            <p class="text-muted mb-2 small">{{this.descricao}}</p>
+
+            <div class="d-flex align-items-center">
+                <div class="bg-success rounded-circle d-inline-block mr-2" style="width: 8px; height: 8px;"></div>
+                <small class="text-secondary">Por: 
+                    <strong>
+                        {{#each this.Usuarios}}
+                            {{this.login}}{{#unless @last}}, {{/unless}}
+                        {{/each}}
+                    </strong>
+                </small>
+            </div>
+        </div>
+
+        <div class="ml-4">
+            <a href="/receita/{{this.id}}" class="btn btn-outline-success font-weight-bold px-4">
+                Ver Receita
+            </a>
+        </div>
+    </div>
+    {{else}}
+    <div class="text-center py-5 bg-white border rounded-lg">
+        <p class="text-muted mb-0 italic">Nenhuma receita encontrada no sistema.</p>
+    </div>
+    {{/each}}
+</div>

@@ -1,4 +1,5 @@
-const Usuario = require('../models/relational/Usuario'); // Mantive o seu caminho original
+const Usuario = require('../models/relational/Usuario');
+const { Habilidade, Categoria } = require('../models/relational');
 
 module.exports = {
 
@@ -17,20 +18,20 @@ module.exports = {
           isAdmin: usuario.isAdmin
         };
 
-        return res.send('Login realizado com sucesso');
+        return res.redirect('/home');
       }
 
-      return res.status(401).send('Login ou senha inválidos');
-        
+      return res.render('usuario/login', { erro: 'Usuário ou senha inválidos' });
+      
     } catch (err) {
-      console.error(err);
-      return res.status(500).send('Erro no servidor ao tentar fazer login');
+        console.error(err);
+        return res.status(500).send('Erro no servidor ao tentar fazer login');
     }
   },
 
   async getLogout(req, res) {
     req.session.destroy();
-    return res.send('Logout realizado');
+    return res.redirect('/home');
   },
 
   async createUsuario(req, res) {
@@ -46,20 +47,15 @@ module.exports = {
         return res.status(400).send('Este login já está em uso');
       }
 
-      const novoUsuario = await Usuario.create({
+      const eAdministrador = isAdmin === 'on' || isAdmin === true;
+
+      await Usuario.create({
         login,
         senha,
-        isAdmin: isAdmin || false
+        isAdmin: eAdministrador
       });
 
-      return res.status(201).json({
-        mensagem: 'Usuário criado com sucesso',
-        usuario: {
-            id: novoUsuario.id,
-            login: novoUsuario.login,
-            isAdmin: novoUsuario.isAdmin
-        }
-      });
+      return res.redirect('/usuario');
 
     } catch (err) {
       console.error(err);
@@ -68,15 +64,24 @@ module.exports = {
   },
 
   async getUsuarios(req, res) {
-        try {
-            const usuarios = await Usuario.findAll({
-                attributes: { exclude: ['senha'] }
-            });
-            return res.status(200).json(usuarios);
-        } catch (error) {
-            return res.status(500).json({ erro: 'Erro ao listar usuários.' });
-        }
-    },
+    try {
+      const [usuariosRaw, habilidadesRaw, categoriasRaw] = await Promise.all([
+        Usuario.findAll({ attributes: { exclude: ['senha'] } }),
+        Habilidade.findAll(),
+        Categoria.findAll()
+      ]);
+
+      return res.render('usuario/admin', {
+        usuarios: usuariosRaw.map(u => u.get({ plain: true })),
+        habilidades: habilidadesRaw.map(h => h.get({ plain: true })),
+        categorias: categoriasRaw.map(c => c.get({ plain: true })),
+        usuario: req.session.user
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send('Erro ao carregar o painel administrativo.');
+    }
+  },
 
     async updateUsuario(req, res) {
         try {
@@ -94,12 +99,7 @@ module.exports = {
             });
 
             return res.status(200).json({ 
-                mensagem: 'Usuário atualizado com sucesso!', 
-                usuario: {
-                    id: usuario.id,
-                    login: usuario.login,
-                    isAdmin: usuario.isAdmin
-                }
+                mensagem: 'Usuário atualizado com sucesso!'
             });
         } catch (error) {
             console.error(error);
@@ -121,10 +121,17 @@ module.exports = {
             }
 
             await usuario.destroy();
-            return res.status(200).send('Usuário removido com sucesso.');
-        } catch (error) {
-            return res.status(500).json({ erro: 'Erro ao excluir usuário.' });
-        }
-    }
 
+            return res.redirect('/usuario');
+        } catch (error) {
+            return res.status(500).send('Erro ao excluir usuário.');
+        }
+    },
+
+    renderLogin(req, res) {
+      if (req.session.user) {
+          return res.redirect('/home');
+      }
+      return res.render('usuario/login');
+  }
 };
