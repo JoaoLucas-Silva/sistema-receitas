@@ -21,12 +21,14 @@ Habilidade.belongsToMany(Usuario, {
 Receita.belongsToMany(Usuario, {
     through: ReceitaUsuario,
     foreignKey: 'ReceitaId',
-    otherKey: 'UsuarioId'
+    otherKey: 'UsuarioId',
+    as: 'Usuarios'
 });
 Usuario.belongsToMany(Receita, {
     through: ReceitaUsuario,
     foreignKey: 'UsuarioId',
-    otherKey: 'ReceitaId'
+    otherKey: 'ReceitaId',
+    as: 'Receitas'
 });
 
 // relacionamentos

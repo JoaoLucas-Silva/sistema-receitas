@@ -20,7 +20,12 @@ module.exports = {
   async canManageRecipe(req, res, next) {
     try {
       const usuarioId = req.session.user.id;
-      const receitaId = req.params.id || req.body.receitaId;
+      
+      const receitaId = req.params.id || req.params.receitaId || req.body.receitaId;
+
+      if (!receitaId) {
+        return res.status(400).send('ID da receita não identificado na requisição.');
+      }
 
       if (req.session.user.isAdmin) {
         return next();

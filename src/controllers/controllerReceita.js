@@ -4,21 +4,19 @@ const {
     Usuario,
     ReceitaUsuario
 } = require('../models/relational');
+const Comentario = require('../models/noSql/Comentario');
+const { Op } = require('sequelize');
 
 module.exports = {
 
     async createReceita(req, res) {
         try {
-            const {
-                nome,
-                descricao,
-                link,
-                ingredientes,
-                modoPreparo,
-                categorias
-            } = req.body;
-
+            const { nome, descricao, link, ingredientes, modoPreparo, categorias } = req.body;
             const usuarioId = req.session.user.id;
+
+            if (!nome || !descricao) {
+                return res.render('receita/cadastro-receita', { erro: 'Nome e Descrição são obrigatórios!' });
+            }
 
             const receita = await Receita.create({
                 nome,
@@ -28,9 +26,10 @@ module.exports = {
                 modoPreparo
             });
 
-            if (categorias && categorias.length > 0) {
+            if (categorias) {
+                const idsCategorias = Array.isArray(categorias) ? categorias : [categorias];
                 const categoriasEncontradas = await Categoria.findAll({
-                    where: { id: categorias }
+                    where: { id: idsCategorias }
                 });
                 await receita.setCategorias(categoriasEncontradas);
             }
@@ -41,44 +40,106 @@ module.exports = {
                 criador: true
             });
 
-            return res.status(201).json(receita);
+            return res.redirect('/home');
         } catch (error) {
-            return res.status(500).json({
-                erro: 'Erro ao criar receita',
-                detalhes: error.message
-            });
+            console.error(error);
+            return res.render('receita/cadastro-receita', { erro: 'Erro interno ao criar receita.' });
         }
     },
 
     async getReceitas(req, res) {
         try {
-            const receitas = await Receita.findAll({
-                include: [
-                    {
-                        model: Categoria,
-                        as: 'categorias',
-                        through: { attributes: [] }
-                    },
-                    {
-                        model: Usuario,
-                        attributes: ['id', 'login'],
-                        through: { attributes: ['criador'] }
-                    }
-                ]
+            const { search } = req.query;
+            let whereClause = {};
+
+            if (search) {
+                whereClause = {
+                    [Op.or]: [
+                        { nome: { [Op.iLike]: `%${search}%` } },
+                        { ingredientes: { [Op.iLike]: `%${search}%` } }
+                    ]
+                };
+            }
+
+            const [receitasRaw, categoriasRaw] = await Promise.all([
+                Receita.findAll({
+                    where: whereClause,
+                    include: [
+                        {
+                            model: Categoria,
+                            as: 'categorias',
+                            through: { attributes: [] }
+                        },
+                        {
+                            model: Usuario,
+                            as: 'Usuarios',
+                            attributes: ['id', 'login'],
+                            through: { attributes: ['criador'] }
+                        }
+                    ]
+                }),
+                Categoria.findAll()
+            ]);
+
+            const receitas = receitasRaw.map(r => r.get({ plain: true }));
+            const categorias = categoriasRaw.map(c => c.get({ plain: true }));
+
+            return res.render('home', { 
+                receitas, 
+                categorias,
+                titulo: "Confira nossas Receitas",
+                usuario: req.session.user,
+                search
             });
-            return res.status(200).json(receitas);
+
         } catch (error) {
-            return res.status(500).json({
-                erro: 'Erro ao buscar receitas',
-                detalhes: error.message
+            console.error(error);
+            return res.status(500).send("Erro ao buscar receitas");
+        }
+    },
+
+    async getReceitasByCategoria(req, res) {
+        try {
+            const { categoriaId } = req.params;
+
+            const [receitasRaw, categoriasRaw] = await Promise.all([
+                Receita.findAll({
+                    include: [
+                        {
+                            model: Categoria,
+                            as: 'categorias',
+                            where: { id: categoriaId },
+                            through: { attributes: [] }
+                        },
+                        {
+                            model: Usuario,
+                            attributes: ['id', 'login']
+                        }
+                    ]
+                }),
+                Categoria.findAll()
+            ]);
+
+            const receitas = receitasRaw.map(r => r.get({ plain: true }));
+            const categorias = categoriasRaw.map(c => c.get({ plain: true }));
+
+            return res.render('home', { 
+                receitas, 
+                categorias, 
+                usuario: req.session.user 
             });
+            
+        } catch (error) {
+            console.error(error);
+            return res.status(500).send("Erro ao filtrar por categoria");
         }
     },
 
     async getReceitaById(req, res) {
         try {
             const { id } = req.params;
-            const receita = await Receita.findByPk(id, {
+
+            let receitaRaw = await Receita.findByPk(id, {
                 include: [
                     {
                         model: Categoria,
@@ -87,42 +148,81 @@ module.exports = {
                     },
                     {
                         model: Usuario,
+                        as: 'Usuarios',
                         attributes: ['id', 'login'],
                         through: { attributes: ['criador'] }
                     }
                 ]
             });
 
-            if (!receita) {
-                return res.status(404).json({ erro: 'Receita não encontrada' });
+            if (!receitaRaw) {
+                return res.status(404).send('Receita não encontrada');
             }
 
-            return res.status(200).json(receita);
-        } catch (error) {
-            return res.status(500).json({
-                erro: 'Erro ao buscar receita',
-                detalhes: error.message
+            const comentarios = await Comentario.find({ receitaId: id }).lean();
+
+            const receita = receitaRaw.get({ plain: true });
+            receita.comentarios = comentarios;
+
+            const eAutor = req.session.user && receita.Usuarios.some(u => u.id === req.session.user.id);
+
+            let usuariosDisponiveis = [];
+            if (eAutor) {
+                const idsAtuais = receita.Usuarios.map(u => u.id);
+                const todosUsuarios = await Usuario.findAll({
+                    where: {
+                        id: { [Op.notIn]: idsAtuais },
+                        isAdmin: false
+                    },
+                    attributes: ['id', 'login']
+                });
+                usuariosDisponiveis = todosUsuarios.map(u => u.get({ plain: true }));
+            }
+
+            return res.render('receita/detalhes', { 
+                receita, 
+                eAutor, 
+                usuariosDisponiveis, 
+                usuario: req.session.user 
             });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).send("Erro ao buscar detalhes da receita");
+        }
+    },
+
+    async renderEditar(req, res) {
+        try {
+            const { id } = req.params;
+            const receitaRaw = await Receita.findByPk(id, {
+                include: [{ model: Categoria, as: 'categorias' }]
+            });
+
+            if (!receitaRaw) return res.status(404).send('Receita não encontrada');
+
+            const categoriasRaw = await Categoria.findAll();
+            
+            const receita = receitaRaw.get({ plain: true });
+            const listaCategorias = categoriasRaw.map(c => c.get({ plain: true }));
+
+            return res.render('receita/editar-receita', {
+                receita,
+                listaCategorias,
+                usuario: req.session.user
+            });
+        } catch (error) {
+            return res.status(500).send("Erro ao carregar tela de edição");
         }
     },
 
     async updateReceita(req, res) {
         try {
             const { id } = req.params;
-            const {
-                nome,
-                descricao,
-                link,
-                ingredientes,
-                modoPreparo,
-                categorias
-            } = req.body;
+            const { nome, descricao, link, ingredientes, modoPreparo, categorias } = req.body;
 
             const receita = await Receita.findByPk(id);
 
-            if (!receita) {
-                return res.status(404).json({ erro: 'Receita não encontrada' });
-            }
+            if (!receita) return res.status(404).send('Receita não encontrada');
 
             await receita.update({
                 nome,
@@ -133,18 +233,19 @@ module.exports = {
             });
 
             if (categorias) {
+                const idsCategorias = Array.isArray(categorias) ? categorias : [categorias];
                 const categoriasEncontradas = await Categoria.findAll({
-                    where: { id: categorias }
+                    where: { id: idsCategorias }
                 });
                 await receita.setCategorias(categoriasEncontradas);
+            } else {
+                await receita.setCategorias([]);
             }
 
-            return res.status(200).json(receita);
+            return res.redirect(`/receita/${id}`);
         } catch (error) {
-            return res.status(500).json({
-                erro: 'Erro ao atualizar receita',
-                detalhes: error.message
-            });
+            console.error(error);
+            return res.status(500).send("Erro ao atualizar receita");
         }
     },
 
@@ -153,35 +254,32 @@ module.exports = {
             const { id } = req.params;
             const receita = await Receita.findByPk(id);
 
-            if (!receita) {
-                return res.status(404).json({ erro: 'Receita não encontrada' });
-            }
+            if (!receita) return res.status(404).send('Receita não encontrada');
 
             await receita.destroy();
-            return res.status(200).json({ mensagem: 'Receita removida com sucesso' });
+            return res.redirect('/home');
         } catch (error) {
-            return res.status(500).json({
-                erro: 'Erro ao remover receita',
-                detalhes: error.message
-            });
+            return res.status(500).send("Erro ao remover receita");
         }
     },
 
     async addCoautor(req, res) {
         try {
-            const { receitaId, alunoId } = req.body;
+            const receitaId = req.params.id; 
+            const { usuarioId } = req.body; 
+
             const receita = await Receita.findByPk(receitaId);
             if (!receita) return res.status(404).send('Receita não encontrada.');
 
             await ReceitaUsuario.create({
                 ReceitaId: receitaId,
-                UsuarioId: alunoId,
+                UsuarioId: usuarioId,
                 criador: false
             });
 
-            return res.status(201).send('Coautor adicionado com sucesso!');
+            return res.redirect(`/receita/${receitaId}`);
         } catch (error) {
-            return res.status(500).json({ erro: 'Erro ao adicionar coautor', detalhes: error.message });
+            return res.status(500).send("Erro ao adicionar coautor");
         }
     },
 
@@ -193,12 +291,12 @@ module.exports = {
             });
 
             if (!vinculo) return res.status(404).send('Vínculo não encontrado.');
-            if (vinculo.criador) return res.status(403).send('Não é possível remover o criador da receita.');
+            if (vinculo.criador) return res.status(403).send('Não é possível remover o criador.');
 
             await vinculo.destroy();
-            return res.status(200).send('Coautor removido com sucesso.');
+            return res.redirect(`/receita/${receitaId}`);
         } catch (error) {
-            return res.status(500).json({ erro: 'Erro ao remover coautor' });
+            return res.status(500).send("Erro ao remover coautor");
         }
     },
 
@@ -206,31 +304,49 @@ module.exports = {
         try {
             const { categoriaId } = req.params;
 
-            const receitas = await Receita.findAll({
+            const receitasRaw = await Receita.findAll({
                 include: [
                     {
                         model: Categoria,
                         as: 'categorias',
                         where: { id: categoriaId },
-                        attributes: ['nome'],
                         through: { attributes: [] }
                     },
                     {
                         model: Usuario,
-                        attributes: ['login'],
-                        through: { attributes: [] }
+                        attributes: ['id', 'login']
                     }
                 ]
             });
 
-            if (receitas.length === 0) {
-                return res.status(404).send('Nenhuma receita encontrada para esta categoria.');
-            }
+            const receitas = receitasRaw.map(r => r.get({ plain: true }));
 
-            return res.status(200).json(receitas);
+            const categoriasRaw = await Categoria.findAll();
+            const categorias = categoriasRaw.map(c => c.get({ plain: true }));
+
+            return res.render('home', { 
+                receitas, 
+                categorias, 
+                usuario: req.session.user 
+            });
+            
         } catch (error) {
-            console.error(error);
-            return res.status(500).json({ erro: 'Erro ao filtrar receitas por categoria.', detalhes: error.message });
+            console.error("Erro ao filtrar por categoria:", error);
+            return res.status(500).send("Erro ao carregar receitas desta categoria.");
+        }
+    },
+
+    async renderCadastrar(req, res) {
+        try {
+            const categoriasRaw = await Categoria.findAll();
+            const listaCategorias = categoriasRaw.map(c => c.get({ plain: true }));
+
+            return res.render('receita/cadastro-receita', {
+                usuario: req.session.user,
+                listaCategorias
+            });
+        } catch (error) {
+            return res.status(500).send("Erro ao carregar tela de cadastro");
         }
     }
 };

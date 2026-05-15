@@ -9,16 +9,16 @@ module.exports = {
             
             const usuarioLogin = req.session.user.login; 
 
-            const novoComentario = await Comentario.create({
+            await Comentario.create({
                 receitaId,
                 usuarioLogin,
                 texto
             });
 
-            return res.status(201).json(novoComentario);
+            return res.redirect(`/receita/${receitaId}`);
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ erro: 'Erro ao adicionar comentário', detalhes: error.message });
+            return res.status(500).send('Erro ao adicionar comentário');
         }
     },
 

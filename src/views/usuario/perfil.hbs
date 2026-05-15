@@ -1,0 +1,101 @@
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body text-center py-5">
+                <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; font-size: 2rem; font-weight: bold;">
+                    {{usuario.nome.[0]}}
+                </div>
+                <h4 class="font-weight-bold mb-1">{{usuario.nome}}</h4>
+                <p class="text-muted small">Estudante de Engenharia de Software</p>
+                <div class="badge badge-light border px-3 py-2 mt-2">Ativo no Sistema</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="bg-white border rounded-lg p-4 shadow-sm">
+            <h5 class="font-weight-bold mb-4 text-dark">Minhas Habilidades Culinárias</h5>
+            
+            <form action="/meu-perfil/habilidade" method="POST" class="form-row align-items-end mb-5">
+                <div class="col-md-6">
+                    <label class="small font-weight-bold text-muted text-uppercase">Habilidade</label>
+                    <select name="habilidadeId" class="form-control bg-light border-0" required>
+                        <option value="">Selecione para adicionar...</option>
+                        {{#each catalogoHabilidades}}
+                        <option value="{{this.id}}">{{this.nome}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="small font-weight-bold text-muted text-uppercase">Nível (0-10)</label>
+                    <input type="number" name="nivel" class="form-control bg-light border-0" min="0" max="10" required>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-success btn-block font-weight-bold">Adicionar</button>
+                </div>
+            </form>
+
+            <div class="list-group list-group-flush">
+                {{#each minhasHabilidades}}
+                <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                    <div class="w-75">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="font-weight-bold text-dark">{{this.nome}}</span>
+                            <span class="badge badge-success">Nível {{this.UsuarioHabilidade.nivel}}</span>
+                        </div>
+                        <div class="progress" style="height: 8px; border-radius: 10px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{multiply this.UsuarioHabilidade.nivel 10}}%"></div>
+                        </div>
+                    </div>
+                    <form action="/meu-perfil/habilidade/{{this.id}}?_method=DELETE" method="POST">
+                        <button type="submit" class="btn btn-sm btn-outline-danger border-0 font-weight-bold" 
+                                onclick="return confirm('Remover esta habilidade?')">
+                            Excluir
+                        </button>
+                    </form>
+                </div>
+                {{else}}
+                <div class="text-center py-4">
+                    <p class="text-muted italic mb-0">Nenhuma habilidade cadastrada no seu perfil.</p>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+        <div class="row mt-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="font-weight-bold text-dark mb-0">👨‍🍳 Minhas Receitas</h3>
+                <a href="/receita/cadastrar" class="btn btn-success font-weight-bold">
+                    + Cadastrar Nova Receita
+                </a>
+            </div>
+
+            <div class="row">
+                {{#each minhasReceitas}}
+                <div class="col-md-6 mb-3">
+                    <div class="bg-white border rounded-lg p-3 shadow-sm d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="font-weight-bold mb-1">{{this.nome}}</h6>
+                            {{#each this.categorias}}
+                                <span class="badge badge-light border text-muted mr-1" style="font-size: 0.7rem;">{{this.nome}}</span>
+                            {{/each}}
+                        </div>
+                        <div>
+                            <a href="/receita/editar/{{this.id}}" class="btn btn-sm btn-outline-primary mr-1">Editar</a>
+                            <a href="/receita/{{this.id}}" class="btn btn-sm btn-link text-success p-0">Ver</a>
+                        </div>
+                    </div>
+                </div>
+                {{else}}
+                <div class="col-12">
+                    <div class="alert alert-light border text-center py-4">
+                        <p class="text-muted mb-0">Você ainda não cadastrou nenhuma receita.</p>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+    </div>
+</div>

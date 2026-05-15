@@ -1,74 +1,77 @@
 const Habilidade = require('../models/relational/Habilidade');
 const Usuario = require('../models/relational/Usuario');
-const UsuarioHabilidade = require('../models/relational/UsuarioHabilidade');
+const Receita = require ('../models/relational/Receita');
 
 module.exports = {
 
-    async createHabilidade(req, res) {
-        try {
-            const { nome } = req.body;
-            if (!nome) return res.status(400).send('O nome da habilidade é obrigatório.');
+    async renderPerfil(req, res) {
+    try {
+        const usuarioId = req.session.user.id;
 
-            const habilidade = await Habilidade.create({ nome });
-            return res.status(201).json(habilidade);
-        } catch (error) {
-            return res.status(500).json({ erro: 'Erro ao criar habilidade', detalhes: error.message });
+        const usuarioCompleto = await Usuario.findByPk(usuarioId, {
+            include: [
+                { 
+                    model: Habilidade, 
+                    through: { attributes: ['nivel'] } 
+                },
+                {
+                    model: require('../models/relational/Receita'), 
+                    as: 'Receitas',
+                    include: {
+                        model: require('../models/relational/Categoria'),
+                        as: 'categorias',
+                        through: { attributes: [] }
+                    }
+                }
+            ]
+        });
+
+        if (!usuarioCompleto) {
+            return res.status(404).send("Usuário não encontrado.");
         }
-    },
 
-    async getHabilidades(req, res) {
-        try {
-            const habilidades = await Habilidade.findAll();
-            return res.status(200).json(habilidades);
-        } catch (error) {
-            return res.status(500).json({ erro: 'Erro ao listar habilidades' });
-        }
-    },
+        const todasHabilidades = await Habilidade.findAll();
 
-    async updateHabilidade(req, res) {
-        try {
-            const { id } = req.params;
-            const { nome } = req.body;
-
-            const habilidade = await Habilidade.findByPk(id);
-            if (!habilidade) return res.status(404).send('Habilidade não encontrada.');
-
-            await habilidade.update({ nome });
-            return res.status(200).json(habilidade);
-        } catch (error) {
-            return res.status(500).json({ erro: 'Erro ao atualizar habilidade' });
-        }
-    },
-
-    async deleteHabilidade(req, res) {
-        try {
-            const { id } = req.params;
-            const habilidade = await Habilidade.findByPk(id);
+        const minhasHabilidades = usuarioCompleto.Habilidades 
+            ? usuarioCompleto.Habilidades.map(h => h.get({ plain: true })) 
+            : [];
             
-            if (!habilidade) return res.status(404).send('Habilidade não encontrada.');
+        const minhasReceitas = usuarioCompleto.Receitas 
+            ? usuarioCompleto.Receitas.map(r => r.get({ plain: true })) 
+            : [];
 
-            await habilidade.destroy();
-            return res.status(200).send('Habilidade excluída com sucesso.');
-        } catch (error) {
-            return res.status(500).json({ erro: 'Erro ao excluir habilidade' });
-        }
-    },
+        return res.render('usuario/perfil', {
+            usuario: req.session.user,
+            minhasHabilidades,
+            minhasReceitas,
+            catalogoHabilidades: todasHabilidades.map(h => h.get({ plain: true }))
+        });
+
+    } catch (error) {
+        console.error("Erro ao carregar perfil:", error);
+        return res.status(500).send("Erro ao carregar o perfil.");
+    }
+},
 
     async addHabilidadeAoPerfil(req, res) {
         try {
             const usuarioId = req.session.user.id;
             const { habilidadeId, nivel } = req.body;
 
+            if (nivel < 0 || nivel > 10) {
+                return res.redirect('/meu-perfil?erro=nivel');
+            }
+
             const usuario = await Usuario.findByPk(usuarioId);
             const habilidade = await Habilidade.findByPk(habilidadeId);
 
-            if (!habilidade) return res.status(404).send('Habilidade não existe no catálogo.');
+            if (!habilidade) return res.status(404).send('Habilidade inexistente.');
 
             await usuario.addHabilidade(habilidade, { through: { nivel: nivel } });
 
-            return res.status(201).send('Habilidade adicionada ao seu perfil!');
+            return res.redirect('/meu-perfil');
         } catch (error) {
-            return res.status(500).json({ erro: 'Erro ao vincular habilidade', detalhes: error.message });
+            return res.status(500).send("Erro ao salvar habilidade.");
         }
     },
 
@@ -80,25 +83,40 @@ module.exports = {
             const usuario = await Usuario.findByPk(usuarioId);
             const habilidade = await Habilidade.findByPk(id);
 
-            if (!habilidade) return res.status(404).send('Habilidade não encontrada.');
-
             await usuario.removeHabilidade(habilidade);
-            return res.status(200).send('Habilidade removida do seu perfil.');
+
+            return res.redirect('/meu-perfil');
         } catch (error) {
-            return res.status(500).json({ erro: 'Erro ao remover habilidade' });
+            return res.status(500).send("Erro ao remover habilidade.");
+        }
+    },
+
+    async createHabilidade(req, res) {
+        try {
+            const { nome } = req.body;
+            await Habilidade.create({ nome });
+
+            return res.redirect('/usuario');
+        } catch (error) {
+            console.error(error);
+            return res.status(500).send("Erro ao criar habilidade.");
+        }
+    },
+
+    async getHabilidades(req, res) {
+        try {
+            const habilidadesRaw = await Habilidade.findAll();
+            const habilidades = habilidadesRaw.map(h => h.get({ plain: true }));
+            return res.json(habilidades);
+        } catch (error) {
+            return res.status(500).json({ erro: 'Erro ao listar habilidades' });
         }
     },
 
     async getRelatorioHabilidades(req, res) {
         try {
-
-            const totalAlunos = await Usuario.count({
-                where: { isAdmin: false }
-            });
-
-            if (totalAlunos === 0) {
-                return res.status(200).json({ mensagem: "Nenhum aluno cadastrado no sistema." });
-            }
+            const totalAlunos = await Usuario.count({ where: { isAdmin: false } });
+            if (totalAlunos === 0) return res.render('categoria/relatorio', { mensagem: "Sem alunos." });
 
             const habilidades = await Habilidade.findAll({
                 include: [{
@@ -112,20 +130,49 @@ module.exports = {
             const relatorio = habilidades.map(h => {
                 const totalComHabilidade = h.Usuarios.length;
                 const proporcao = ((totalComHabilidade / totalAlunos) * 100).toFixed(2);
-
+                
                 return {
                     habilidade: h.nome,
+                    porcentagem: proporcao,
                     quantidadeAlunos: totalComHabilidade,
-                    totalSistema: totalAlunos,
-                    porcentagem: `${proporcao}%`
+                    totalSistema: totalAlunos
                 };
             });
 
-            return res.status(200).json(relatorio);
+            return res.render('categoria/relatorio', { relatorio });
         } catch (error) {
             console.error(error);
-            return res.status(500).json({ erro: 'Erro ao gerar relatório.' });
+            return res.status(500).send("Erro no relatório.");
         }
-    }
-    
+    },
+
+    async updateHabilidade(req, res) {
+        try {
+            const { id } = req.params;
+            const { nome } = req.body;
+            const habilidade = await Habilidade.findByPk(id);
+            if (!habilidade) return res.status(404).send('Habilidade não encontrada.');
+
+            await habilidade.update({ nome });
+
+            return res.redirect('/usuario');
+        } catch (error) {
+            return res.status(500).send('Erro ao atualizar habilidade');
+        }
+    },
+
+    async deleteHabilidade(req, res) {
+        try {
+            const { id } = req.params;
+            const habilidade = await Habilidade.findByPk(id);
+            if (!habilidade) return res.status(404).send('Habilidade não encontrada.');
+
+            await habilidade.destroy();
+
+            return res.redirect('/usuario');
+        } catch (error) {
+            console.error(error);
+            return res.status(500).send('Erro ao excluir habilidade');
+        }
+    },
 };

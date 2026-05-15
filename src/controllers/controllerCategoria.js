@@ -4,124 +4,81 @@ module.exports = {
 
     async createCategoria(req, res) {
         try {
-
             const { nome } = req.body;
 
-            const categoria = await Categoria.create({
+            await Categoria.create({
                 nome
             });
 
-            return res.status(201).json(categoria);
+            return res.redirect('/usuario');
 
         } catch (error) {
-
-            return res.status(500).json({
-                erro: 'Erro ao criar categoria',
-                detalhes: error.message
-            });
-
+            console.error(error);
+            return res.status(500).send('Erro ao criar categoria');
         }
     },
 
     async getCategorias(req, res) {
         try {
-
-            const categorias = await Categoria.findAll();
+            const categoriasRaw = await Categoria.findAll();
+            const categorias = categoriasRaw.map(c => c.get({ plain: true }));
 
             return res.status(200).json(categorias);
-
         } catch (error) {
-
-            return res.status(500).json({
-                erro: 'Erro ao buscar categorias',
-                detalhes: error.message
-            });
-
+            return res.status(500).send('Erro ao buscar categorias');
         }
     },
 
     async getCategoriaById(req, res) {
         try {
-
             const { id } = req.params;
-
             const categoria = await Categoria.findByPk(id);
 
             if (!categoria) {
-                return res.status(404).json({
-                    erro: 'Categoria não encontrada'
-                });
+                return res.status(404).send('Categoria não encontrada');
             }
 
             return res.status(200).json(categoria);
-
         } catch (error) {
-
-            return res.status(500).json({
-                erro: 'Erro ao buscar categoria',
-                detalhes: error.message
-            });
-
+            return res.status(500).send('Erro ao buscar categoria');
         }
     },
 
     async updateCategoria(req, res) {
         try {
-
             const { id } = req.params;
             const { nome } = req.body;
 
             const categoria = await Categoria.findByPk(id);
 
             if (!categoria) {
-                return res.status(404).json({
-                    erro: 'Categoria não encontrada'
-                });
+                return res.status(404).send('Categoria não encontrada');
             }
 
-            await categoria.update({
-                nome
-            });
+            await categoria.update({ nome });
 
-            return res.status(200).json(categoria);
-
+            return res.redirect('/usuario');
         } catch (error) {
-
-            return res.status(500).json({
-                erro: 'Erro ao atualizar categoria',
-                detalhes: error.message
-            });
-
+            return res.status(500).send('Erro ao atualizar categoria');
         }
     },
 
     async deleteCategoria(req, res) {
         try {
-
             const { id } = req.params;
-
             const categoria = await Categoria.findByPk(id);
 
             if (!categoria) {
-                return res.status(404).json({
-                    erro: 'Categoria não encontrada'
-                });
+                return res.status(404).send('Categoria não encontrada');
             }
 
             await categoria.destroy();
 
-            return res.status(200).json({
-                mensagem: 'Categoria removida com sucesso'
-            });
+            return res.redirect('/usuario');
 
         } catch (error) {
-
-            return res.status(500).json({
-                erro: 'Erro ao remover categoria',
-                detalhes: error.message
-            });
-
+            console.error(error);
+            return res.status(500).send('Erro ao remover categoria');
         }
     }
-
 };
