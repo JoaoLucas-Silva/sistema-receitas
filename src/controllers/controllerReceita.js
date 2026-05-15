@@ -253,13 +253,28 @@ module.exports = {
     async deleteReceita(req, res) {
         try {
             const { id } = req.params;
+            const usuarioLogadoId = req.session.user.id;
+
+            const vinculo = await ReceitaUsuario.findOne({
+                where: { 
+                    ReceitaId: id, 
+                    UsuarioId: usuarioLogadoId 
+                }
+            });
+
+            if (!vinculo || vinculo.criador === false) {
+                return res.status(403).send("Acesso Negado: Apenas o criador original pode excluir esta receita.");
+            }
+
             const receita = await Receita.findByPk(id);
 
             if (!receita) return res.status(404).send('Receita não encontrada');
 
             await receita.destroy();
             return res.redirect('/home');
+            
         } catch (error) {
+            console.error("Erro no deleteReceita:", error);
             return res.status(500).send("Erro ao remover receita");
         }
     },
