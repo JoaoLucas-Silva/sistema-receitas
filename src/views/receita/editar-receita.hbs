@@ -1,0 +1,67 @@
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb bg-transparent p-0">
+        <li class="breadcrumb-item"><a href="/home" class="text-success">Início</a></li>
+        <li class="breadcrumb-item"><a href="/receita/{{receita.id}}" class="text-success">{{receita.nome}}</a></li>
+        <li class="breadcrumb-item active">Editar</li>
+    </ol>
+</nav>
+
+<div class="bg-white border rounded-lg p-5 shadow-sm">
+    <div class="mb-4">
+        <h2 class="font-weight-bold text-dark">Editar Receita</h2>
+        <p class="text-muted">Atualize as informações da sua receita abaixo.</p>
+    </div>
+
+    <form action="/receita/{{receita.id}}?_method=PUT" method="POST">
+        <div class="row">
+            <div class="col-md-7">
+                <div class="form-group">
+                    <label class="font-weight-bold small text-uppercase">Nome da Receita</label>
+                    <input type="text" name="nome" class="form-control" value="{{receita.nome}}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="font-weight-bold small text-uppercase">Descrição Curta</label>
+                    <input type="text" name="descricao" class="form-control" value="{{receita.descricao}}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="font-weight-bold small text-uppercase">Link da Referência (Opcional)</label>
+                    <input type="url" name="link" class="form-control" value="{{receita.link}}">
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="form-group">
+                    <label class="font-weight-bold small text-uppercase">Categorias</label>
+                    <select name="categorias" class="form-control" multiple style="height: 165px;">
+                        {{#each listaCategorias}}
+                            <option value="{{this.id}}" 
+                                {{#ifIn this.id ../receita.categorias}}selected{{/ifIn}}>
+                                {{this.nome}}
+                            </option>
+                        {{/each}}
+                    </select>
+                    <small class="form-text text-muted">Mantenha pressionado Ctrl (ou Command) para selecionar várias.</small>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="form-group">
+            <label class="font-weight-bold small text-uppercase">Ingredientes</label>
+            <textarea name="ingredientes" class="form-control" rows="6" required>{{receita.ingredientes}}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label class="font-weight-bold small text-uppercase">Modo de Preparo</label>
+            <textarea name="modoPreparo" class="form-control" rows="8" required>{{receita.modoPreparo}}</textarea>
+        </div>
+
+        <div class="mt-5 d-flex justify-content-between">
+            <a href="/receita/{{receita.id}}" class="btn btn-link text-muted font-weight-bold">Cancelar e Voltar</a>
+            <button type="submit" class="btn btn-success px-5 font-weight-bold">Salvar Alterações</button>
+        </div>
+    </form>
+</div>

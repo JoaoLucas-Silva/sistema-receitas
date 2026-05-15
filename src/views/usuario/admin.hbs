@@ -1,0 +1,112 @@
+<div class="row mb-5">
+    <div class="col">
+        <h2 class="font-weight-bold">Painel de Administração</h2>
+        <p class="text-muted">Gestão de Alunos, Habilidades e Categorias do sistema.</p>
+    </div>
+</div>
+
+<ul class="nav nav-pills mb-4" id="adminTabs" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active" id="usuarios-tab" data-toggle="pill" href="#usuarios" role="tab">👥 Alunos</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="habilidades-tab" data-toggle="pill" href="#habilidades" role="tab">🔪 Catálogo de Habilidades</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="categorias-tab" data-toggle="pill" href="#categorias" role="tab">🥗 Categorias</a>
+    </li>
+</ul>
+
+<div class="tab-content bg-white border rounded-lg p-4 shadow-sm" id="adminTabsContent">
+    
+    <div class="tab-pane fade show active" id="usuarios" role="tabpanel">
+        <div class="bg-light p-3 rounded mb-4">
+            <h6 class="font-weight-bold mb-3">Cadastrar Novo Usuário</h6>
+            <form action="/usuario" method="POST" class="form-inline">
+                <input type="text" name="login" class="form-control form-control-sm mr-2 mb-2" placeholder="Login" required>
+                <input type="password" name="senha" class="form-control form-control-sm mr-2 mb-2" placeholder="Senha" required>
+                <div class="form-check mr-3 mb-2">
+                    <input type="checkbox" name="isAdmin" class="form-check-input" id="checkAdmin">
+                    <label class="form-check-label small font-weight-bold text-danger" for="checkAdmin">Admin?</label>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm mb-2 px-3">Cadastrar</button>
+            </form>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-borderless table-hover">
+                <thead class="bg-light">
+                    <tr class="small text-muted text-uppercase">
+                        <th>Login</th>
+                        <th>Tipo</th>
+                        <th class="text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each usuarios}}
+                    <tr class="border-bottom">
+                        <td class="font-weight-bold align-middle">{{this.login}}</td>
+                        <td class="align-middle">
+                            {{#if this.isAdmin}}
+                            <span class="badge badge-dark">Admin</span>
+                            {{else}}
+                            <span class="badge badge-light border">Aluno</span>
+                            {{/if}}
+                        </td>
+                        <td class="text-right">
+                            <form action="/usuario/{{this.id}}?_method=DELETE" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-link text-danger btn-sm p-0" onclick="return confirm('Excluir este usuário?')">Remover</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="habilidades" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="font-weight-bold mb-0">Habilidades do Sistema</h5>
+            <form action="/habilidade" method="POST" class="form-inline">
+                <input type="text" name="nome" class="form-control form-control-sm mr-2" placeholder="Nome (ex: Flambar)" required>
+                <button type="submit" class="btn btn-primary btn-sm">Adicionar</button>
+            </form>
+        </div>
+        <div class="row">
+            {{#each habilidades}}
+            <div class="col-md-4 mb-2">
+                <div class="border rounded p-2 d-flex justify-content-between align-items-center bg-light shadow-xs">
+                    <span class="small font-weight-bold">{{this.nome}}</span>
+                    <form action="/habilidade/{{this.id}}?_method=DELETE" method="POST" class="m-0">
+                        <button type="submit" class="btn btn-link text-danger btn-sm p-0 font-weight-bold">×</button>
+                    </form>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="categorias" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="font-weight-bold mb-0">Categorias de Receitas</h5>
+            <form action="/categoria" method="POST" class="form-inline">
+                <input type="text" name="nome" class="form-control form-control-sm mr-2" placeholder="Ex: Vegana, Italiana" required>
+                <button type="submit" class="btn btn-success btn-sm">Criar Categoria</button>
+            </form>
+        </div>
+        <div class="row">
+            {{#each categorias}}
+            <div class="col-md-3 mb-2">
+                <div class="border rounded p-2 d-flex justify-content-between align-items-center">
+                    <span class="small">{{this.nome}}</span>
+                    <form action="/categoria/{{this.id}}?_method=DELETE" method="POST" class="m-0">
+                        <button type="submit" class="btn btn-link text-danger btn-sm p-0">×</button>
+                    </form>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+
+</div>

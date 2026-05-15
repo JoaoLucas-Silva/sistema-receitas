@@ -1,0 +1,48 @@
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="mb-4">
+            <h2 class="font-weight-bold">👤 Gerenciar Usuário</h2>
+            <p class="text-muted">Cadastre ou edite as credenciais de acesso ao sistema.</p>
+        </div>
+
+        <div class="bg-white border rounded-lg p-4 shadow-sm">
+            <form action="{{#if usuario}}/usuario/{{usuario.id}}?_method=PUT{{else}}/usuario{{/if}}" method="POST">
+                
+                <div class="form-group">
+                    <label class="small font-weight-bold text-muted text-uppercase">Login / Usuário</label>
+                    <input type="text" name="login" class="form-control border-light bg-light" 
+                           value="{{usuario.login}}" required placeholder="Ex: luan.santos">
+                </div>
+
+                {{#unless usuario}}
+                <div class="form-group">
+                    <label class="small font-weight-bold text-muted text-uppercase">Senha Inicial</label>
+                    <input type="password" name="senha" class="form-control border-light bg-light" 
+                           required placeholder="••••••••">
+                </div>
+                {{/unless}}
+
+                <div class="form-group mb-4">
+                    <label class="small font-weight-bold text-muted text-uppercase">Nível de Permissão</label>
+                    <select name="isAdmin" class="form-control border-light bg-light">
+                        <option value="false" {{#unless usuario.isAdmin}}selected{{/unless}}>Aluno (Padrão)</option>
+                        <option value="true" {{#if usuario.isAdmin}}selected{{/if}}>Administrador</option>
+                    </select>
+                </div>
+
+                <div class="border-top pt-4 d-flex justify-content-between align-items-center">
+                    <a href="/usuario" class="text-muted small">Voltar para lista</a>
+                    <button type="submit" class="btn btn-primary px-4">
+                        {{#if usuario}}Atualizar Dados{{else}}Confirmar Cadastro{{/if}}
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        {{#if erro}}
+        <div class="alert alert-danger mt-3 small">
+            {{erro}}
+        </div>
+        {{/if}}
+    </div>
+</div>

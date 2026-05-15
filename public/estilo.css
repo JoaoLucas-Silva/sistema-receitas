@@ -1,0 +1,74 @@
+/* public/css/estilo.css */
+:root {
+    --primary: #10b981;
+    --primary-dark: #059669;
+    --accent: #f97316;
+    --bg: #fafafa;
+    --border: #e5e7eb;
+}
+
+body {
+    background-color: var(--bg);
+    font-family: 'Inter', sans-serif;
+    color: #111827;
+}
+
+/* Navbar Estilo Minimal */
+.navbar {
+    background: #fff !important;
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 0;
+}
+
+.nav-link {
+    color: #6b7280 !important;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    color: var(--primary) !important;
+}
+
+/* Itens de Lista (Sem Cards) */
+.list-item {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 0.75rem;
+    transition: border-color 0.2s;
+}
+
+.list-item:hover {
+    border-color: var(--primary);
+}
+
+/* Botões */
+.btn-primary {
+    background-color: var(--primary);
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-orange {
+    background-color: var(--accent);
+    color: white;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+/* Badges de Categoria */
+.badge-custom {
+    background: #ecfdf5;
+    color: var(--primary-dark);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
